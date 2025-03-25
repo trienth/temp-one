@@ -1,5 +1,6 @@
 package com.tbb.payment.activities;
 
+import com.tbb.payment.util.RandomUtils;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,6 @@ public class PaymentProcessingActivityImpl implements PaymentProcessingActivity 
     public String processPayment(String paymentId) {
         Thread.sleep(5000);
         // Implement payment processing logic
-        return "Payment processed for " + paymentId;
+        return RandomUtils.randomResult();
     }
 }
