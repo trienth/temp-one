@@ -9,6 +9,7 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.serviceclient.WorkflowServiceStubs;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
+import io.temporal.worker.WorkerOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,15 +37,27 @@ public class TemporalConfig {
     // 4. Create Worker register WorkflowImplementationTypes & ActivitiesImplementations
     @Bean
     public Worker worker(WorkerFactory workerFactory) {
-        Worker worker = workerFactory.newWorker(Constants.PAYMENT_TASK_QUEUE);
+        // Use WorkerOption to configure thread for specific Worker
+        WorkerOptions workerOptions = WorkerOptions.newBuilder()
+                // configure polling workflow & activity
+                .setMaxConcurrentWorkflowTaskPollers(2)
+                .setMaxConcurrentActivityTaskPollers(4)
+                // configure executing tasks
+                .setMaxConcurrentWorkflowTaskExecutionSize(20)
+                .setMaxConcurrentActivityExecutionSize(30)
+                .setMaxConcurrentLocalActivityExecutionSize(40)
+                .build();
+        Worker worker = workerFactory.newWorker(Constants.PAYMENT_TASK_QUEUE, workerOptions);
         worker.registerWorkflowImplementationTypes(PaymentWorkflowImpl.class);
         worker.registerActivitiesImplementations(
                 new PaymentProcessingActivityImpl(),
                 new FraudCheckActivityImpl(),
                 new NotificationActivityImpl()
         );
+
         // Must start worker factory to activate polling
         workerFactory.start();
         return worker;
     }
+
 }

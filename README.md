@@ -1,16 +1,32 @@
-## Create Spring Boot Payment service
-- Use Temporal Spring Starter 1.27.0
-- Create Workflow with 3 separate ActivityInterface
-- Configure WorkflowServiceStubs, WorkflowClient, WorkerFactory, Worker bean
-- Create API to start workflow
 
-## Notes
-* Connect to Temporal server running locally at `localhost:7233`
-* Must start WorkerFactory to `active polling`
-* Workflow use single task queue `PAYMENT_TASK_QUEUE`
+# Configure thread for Temporal Worker
+Worker dùng các threads để thực hiện 2 nhiệm vụ:
+1. Poll Threads: Chuyên thực hiện long-polling để lấy task từ Temporal Server.
+2. Worker/Executor Threads: Xử lý logic của Workflow và Activity.
 
-## Verify
-``` shell
-curl --location --request POST 'http://localhost:8080/api/payments/start?paymentId=ded3fe14-1065-4bdf-833a-beadeaab16b4' \
---header 'Content-Type: application/json'
+```java
+    // Use WorkerOption to configure thread for specific Worker
+    WorkerOptions workerOptions = WorkerOptions.newBuilder()
+            // configure polling workflow & activity
+            .setMaxConcurrentWorkflowTaskPollers(2)
+            .setMaxConcurrentActivityTaskPollers(4)
+            // configure executing tasks
+            .setMaxConcurrentWorkflowTaskExecutionSize(20)
+            .setMaxConcurrentActivityExecutionSize(30)
+            .setMaxConcurrentLocalActivityExecutionSize(40)
+            .build();
 ```
+
+# Verify Thread Dump when running Worker
+
+## 2 Thread polling Workflow tasks
+![Workflow Poller.png](Workflow%20Poller.png)
+
+## 4 Thread polling Activity tasks
+![Activity Poller.png](Activity%20Poller.png)
+
+## 20 Thread for Workflow Executor
+![Workflow Executor.png](Workflow%20Executor.png)
+
+## 30 Thread for Activity Executor
+![Activity Executor.png](Activity%20Executor.png)
