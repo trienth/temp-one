@@ -1,7 +1,6 @@
 ## Giải thích về deterministic trong Temporal Worflow
-Đưa ra ví dụ minh hoạ về fail deterministic với Spring Boot Temporal Java SDK 
-
 Explain deterministic behavior in Temporal Workflows and provide an example of a non-deterministic failure using Spring Boot and the Temporal Java SDK.
+
 A workflow's execution must be deterministic so that when it's replayed from the event history, it follows the exact same path. 
 That means no non-deterministic operations like random numbers, system time, or external calls during the workflow execution.
 
@@ -19,6 +18,7 @@ Let's see, during the first run, the workflow generates a random number, but dur
 In Temporal, when you replay, the code path must be exactly the same. So any branching based on non-deterministic data would cause issues. 
 
 Workflow Deterministic có nghĩa là quá trình thực thi của workflow phải luôn đi theo cùng một logic và tạo ra cùng một kết quả khi được replay từ lịch sử sự kiện (event history). 
+
 Điều này đảm bảo Temporal có thể khôi phục trạng thái workflow sau khi có sự cố (như worker crash) mà không gây ra xung đột hoặc hành vi không mong muốn.
 
 Workflow logic không được phụ thuộc vào các yếu tố không xác định như:
